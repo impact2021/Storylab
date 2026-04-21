@@ -105,3 +105,39 @@
 	margin-top: 5px;
 	display: none;
 }
+
+/* --- Name-on-ticket fields --- */
+.storylab-names-wrap {
+	margin: 12px 0 20px;
+}
+
+.storylab-name-row {
+	margin-bottom: 10px;
+}
+
+.storylab-name-label {
+	display: block;
+	font-weight: 700;
+	font-size: 0.95em;
+	margin-bottom: 5px;
+	color: #111;
+}
+
+.storylab-name-input {
+	width: 100%;
+	max-width: 340px;
+	padding: 9px 12px;
+	border: 2px solid #ccc;
+	border-radius: 4px;
+	font-size: 1em;
+}
+
+.storylab-name-input:focus {
+	border-color: #CD1214;
+	outline: none;
+}
+
+.storylab-name-input.storylab-error {
+	border-color: #CD1214;
+	background: #fff5f5;
+}

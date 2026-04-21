@@ -2,9 +2,9 @@
 /**
  * WooCommerce Integration — Name-Your-Price Tickets
  *
- * Adds a "name your price" input to products that are linked to a show,
- * persists the custom price through the cart/checkout flow, and exposes
- * show details on the product page.
+ * Adds show details (date, time, venue) and a "name your price" input to
+ * products that are ticket products.  All show data is stored directly on
+ * the product — no separate Show post type is required.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,23 +19,23 @@ class Storylab_Ticket_Woo {
 		add_action( 'woocommerce_product_data_panels', array( $this, 'render_product_tab' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'save_product_tab' ) );
 
-		// Front-end: show details + price input.
+		// Front-end: show details + price input + name fields.
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'output_price_field' ), 5 );
 
 		// Enqueue frontend assets.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
-		// Cart: store custom price in item data.
+		// Cart: store custom price and ticket names in item data.
 		add_filter( 'woocommerce_add_cart_item_data',    array( $this, 'store_price_in_cart' ), 10, 3 );
 		add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'validate_price' ), 10, 3 );
 
 		// Apply the stored price every time the cart recalculates.
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'apply_custom_price' ), 20 );
 
-		// Display the chosen price in the cart/checkout line item.
+		// Display the chosen price and ticket names in the cart/checkout line item.
 		add_filter( 'woocommerce_get_item_data', array( $this, 'display_custom_price_in_cart' ), 10, 2 );
 
-		// Persist the chosen price on the order line item.
+		// Persist the chosen price and names on the order line item.
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'save_price_to_order_item' ), 10, 4 );
 	}
 
@@ -57,34 +57,39 @@ class Storylab_Ticket_Woo {
 		global $post;
 		wp_nonce_field( 'storylab_product_meta', 'storylab_product_nonce' );
 
-		$show_id  = get_post_meta( $post->ID, '_storylab_show_id', true );
-		$nyp      = get_post_meta( $post->ID, '_storylab_nyp', true );
+		$nyp       = get_post_meta( $post->ID, '_storylab_nyp', true );
 		$min_price = get_post_meta( $post->ID, '_storylab_min_price', true );
+		$date      = get_post_meta( $post->ID, '_show_date', true );
+		$time      = get_post_meta( $post->ID, '_show_time', true );
+		$location  = get_post_meta( $post->ID, '_show_location', true );
 
-		// Fetch all published shows.
-		$shows = get_posts( array(
-			'post_type'      => Storylab_Show_CPT::POST_TYPE,
-			'posts_per_page' => -1,
-			'post_status'    => 'publish',
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		) );
+		if ( '' === $time )     { $time     = Storylab_Show_CPT::DEFAULT_TIME; }
+		if ( '' === $location ) { $location = Storylab_Show_CPT::DEFAULT_VENUE; }
 		?>
 		<div id="storylab_ticket_data" class="panel woocommerce_options_panel">
 			<div class="options_group">
+
 				<p class="form-field">
-					<label for="storylab_show_id">Linked Show</label>
-					<select id="storylab_show_id" name="storylab_show_id" style="width:50%">
-						<option value="">— None —</option>
-						<?php foreach ( $shows as $show ) : ?>
-							<option value="<?php echo esc_attr( $show->ID ); ?>"
-								<?php selected( $show_id, $show->ID ); ?>>
-								<?php echo esc_html( $show->post_title ); ?>
-							</option>
-						<?php endforeach; ?>
-					</select>
-					<span class="description">Select the show this product sells tickets for.</span>
+					<label for="show_date">Show Date</label>
+					<input type="date" id="show_date" name="show_date"
+					       value="<?php echo esc_attr( $date ); ?>" />
 				</p>
+
+				<p class="form-field">
+					<label for="show_time">Show Time</label>
+					<input type="text" id="show_time" name="show_time"
+					       value="<?php echo esc_attr( $time ); ?>"
+					       placeholder="e.g. 7:00 PM" style="width:120px;" />
+				</p>
+
+				<p class="form-field">
+					<label for="show_location">Venue</label>
+					<input type="text" id="show_location" name="show_location"
+					       value="<?php echo esc_attr( $location ); ?>" style="width:50%"
+					       placeholder="<?php echo esc_attr( Storylab_Show_CPT::DEFAULT_VENUE ); ?>" />
+					<span class="description">Full venue name and address.</span>
+				</p>
+
 				<p class="form-field">
 					<label for="storylab_nyp">
 						<input type="checkbox" id="storylab_nyp" name="storylab_nyp"
@@ -93,13 +98,15 @@ class Storylab_Ticket_Woo {
 					</label>
 					<span class="description">Customers enter their own price at checkout.</span>
 				</p>
+
 				<p class="form-field">
 					<label for="storylab_min_price">Minimum Price (<?php echo get_woocommerce_currency_symbol(); ?>)</label>
 					<input type="number" id="storylab_min_price" name="storylab_min_price"
 					       value="<?php echo esc_attr( $min_price ); ?>"
 					       min="0" step="0.01" style="width:80px" />
-					<span class="description">Leave blank or 0 for no minimum (pure gift).</span>
+					<span class="description">Leave blank or 0 for no minimum.</span>
 				</p>
+
 			</div>
 		</div>
 		<?php
@@ -111,22 +118,21 @@ class Storylab_Ticket_Woo {
 			return;
 		}
 
-		$show_id   = isset( $_POST['storylab_show_id'] ) ? absint( $_POST['storylab_show_id'] ) : 0;
 		$nyp       = isset( $_POST['storylab_nyp'] ) && 'yes' === $_POST['storylab_nyp'] ? 'yes' : 'no';
 		$min_price = isset( $_POST['storylab_min_price'] ) ? wc_format_decimal( $_POST['storylab_min_price'] ) : '';
+		$date      = isset( $_POST['show_date'] )     ? sanitize_text_field( $_POST['show_date'] )     : '';
+		$time      = isset( $_POST['show_time'] )     ? sanitize_text_field( $_POST['show_time'] )     : '';
+		$location  = isset( $_POST['show_location'] ) ? sanitize_text_field( $_POST['show_location'] ) : '';
 
-		update_post_meta( $product_id, '_storylab_show_id',  $show_id );
-		update_post_meta( $product_id, '_storylab_nyp',      $nyp );
+		update_post_meta( $product_id, '_storylab_nyp',       $nyp );
 		update_post_meta( $product_id, '_storylab_min_price', $min_price );
-
-		// Keep the reverse link on the show post.
-		if ( $show_id ) {
-			update_post_meta( $show_id, '_show_product_id', $product_id );
-		}
+		update_post_meta( $product_id, '_show_date',          $date );
+		update_post_meta( $product_id, '_show_time',          $time );
+		update_post_meta( $product_id, '_show_location',      $location );
 	}
 
 	// -------------------------------------------------------------------------
-	// Front-end: price input and show info
+	// Front-end: price input, show info, and name fields
 	// -------------------------------------------------------------------------
 
 	public function enqueue_scripts() {
@@ -215,11 +221,15 @@ class Storylab_Ticket_Woo {
 				       required />
 			</div>
 		</div>
+
+		<div id="storylab-names-wrap" class="storylab-names-wrap">
+			<?php /* Name fields are injected by frontend.js based on the chosen quantity. */ ?>
+		</div>
 		<?php
 	}
 
 	// -------------------------------------------------------------------------
-	// Cart: price persistence
+	// Cart: price and name persistence
 	// -------------------------------------------------------------------------
 
 	public function validate_price( $passed, $product_id, $quantity ) {
@@ -242,6 +252,22 @@ class Storylab_Ticket_Woo {
 			wc_add_notice( sprintf( __( 'The minimum price for this ticket is %s.', 'storylab-tickets' ), wc_price( $min_price ) ), 'error' );
 			return false;
 		}
+
+		// Validate that a name has been supplied for every ticket.
+		$names = isset( $_POST['storylab_ticket_names'] ) ? (array) $_POST['storylab_ticket_names'] : array();
+		for ( $i = 0; $i < $quantity; $i++ ) {
+			if ( empty( trim( $names[ $i ] ?? '' ) ) ) {
+				wc_add_notice(
+					1 === $quantity
+						? __( 'Please enter a name for your ticket.', 'storylab-tickets' )
+						/* translators: %d = ticket number */
+						: sprintf( __( 'Please enter a name for ticket %d.', 'storylab-tickets' ), $i + 1 ),
+					'error'
+				);
+				return false;
+			}
+		}
+
 		return $passed;
 	}
 
@@ -253,10 +279,13 @@ class Storylab_Ticket_Woo {
 		if ( isset( $_POST['storylab_price'] ) && is_numeric( $_POST['storylab_price'] ) ) {
 			$price = abs( (float) $_POST['storylab_price'] );
 			if ( $price > 0 ) {
-				$cart_item_data['storylab_price'] = $price;
+				$cart_item_data['storylab_price']  = $price;
 				// Unique key so multiple different-price tickets are stored separately.
 				$cart_item_data['storylab_unique'] = md5( $price . microtime() );
 			}
+		}
+		if ( isset( $_POST['storylab_ticket_names'] ) && is_array( $_POST['storylab_ticket_names'] ) ) {
+			$cart_item_data['storylab_ticket_names'] = array_map( 'sanitize_text_field', $_POST['storylab_ticket_names'] );
 		}
 		return $cart_item_data;
 	}
@@ -279,12 +308,26 @@ class Storylab_Ticket_Woo {
 				'value' => wc_price( $cart_item['storylab_price'] ),
 			);
 		}
+		if ( isset( $cart_item['storylab_ticket_names'] ) && is_array( $cart_item['storylab_ticket_names'] ) ) {
+			$names = array_filter( array_map( 'trim', $cart_item['storylab_ticket_names'] ) );
+			if ( ! empty( $names ) ) {
+				$item_data[] = array(
+					'key'   => __( 'Ticket names', 'storylab-tickets' ),
+					'value' => implode( ', ', $names ),
+				);
+			}
+		}
 		return $item_data;
 	}
 
 	public function save_price_to_order_item( $item, $cart_item_key, $values, $order ) {
 		if ( isset( $values['storylab_price'] ) ) {
 			$item->add_meta_data( __( 'Ticket Price', 'storylab-tickets' ), wc_price( $values['storylab_price'] ), true );
+		}
+		if ( isset( $values['storylab_ticket_names'] ) && is_array( $values['storylab_ticket_names'] ) ) {
+			// Store with underscore prefix so it is hidden from the order display but
+			// accessible programmatically for ticket generation.
+			$item->add_meta_data( '_storylab_ticket_names', $values['storylab_ticket_names'], true );
 		}
 	}
 
