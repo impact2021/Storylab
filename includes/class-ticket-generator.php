@@ -36,9 +36,9 @@ class Storylab_Ticket_Generator {
 	const C_DGRAY_B =  80;
 
 	// Cream/ivory background
-	const C_CREAM_R = 245;
-	const C_CREAM_G = 240;
-	const C_CREAM_B = 225;
+	const C_CREAM_R = 255;
+	const C_CREAM_G = 255;
+	const C_CREAM_B = 255;
 
 	// Gold/tan border accent
 	const C_GOLD_R  = 184;
@@ -341,8 +341,8 @@ class Storylab_Ticket_Generator {
 
 		// Show name (large, red, bold).
 		$show_name = ! empty( $d['show_name'] ) ? $d['show_name'] : 'Story Lab';
-		$name_size = 15;
-		while ( $name_size > 8
+		$name_size = 18;
+		while ( $name_size > 9
 		        && $w->approx_text_width( $show_name, $name_size, true ) > $content_w ) {
 			$name_size--;
 		}
@@ -350,20 +350,20 @@ class Storylab_Ticket_Generator {
 			$name_size, true,
 			self::C_RED_R, self::C_RED_G, self::C_RED_B );
 		$ops     .= $result['ops'];
-		$cursor_y = $result['y'] + 2;
+		$cursor_y = $result['y'] + 4;
 
 		// Thin red separator line.
 		$ops     .= $w->hline( $content_x, $cursor_y, $content_w - 10,
 			self::C_RED_R, self::C_RED_G, self::C_RED_B, 0.75 );
-		$cursor_y += 10;
+		$cursor_y += 12;
 
 		// Detail rows: DATE, TIME, VENUE, NAME.
-		// Labels: red, 6pt. Values: black bold, 9pt.
+		// Labels: red, 7pt. Values: black bold, 10pt.
 		// Fixed label column width for consistent alignment.
-		$label_size  = 6;
-		$value_size  = 9;
-		$row_h       = 14;
-		$label_col_w = 30; // wide enough for 'VENUE' at 6pt
+		$label_size  = 7;
+		$value_size  = 10;
+		$row_h       = 16;
+		$label_col_w = 36; // wide enough for 'VENUE' at 7pt
 
 		$details = array();
 		if ( ! empty( $d['date'] ) )        { $details[] = array( 'DATE',  $d['date'] ); }
