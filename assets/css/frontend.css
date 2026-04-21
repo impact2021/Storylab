@@ -1,0 +1,107 @@
+/* ============================================================
+   Storylab Tickets — Frontend Styles
+   Colors: black #000, white #fff, red #CD1214
+   ============================================================ */
+
+/* --- Show info block on product pages --- */
+.storylab-show-info {
+	background: #1a1a1a;
+	border-left: 4px solid #CD1214;
+	color: #fff;
+	padding: 14px 18px;
+	margin-bottom: 18px;
+	border-radius: 0 4px 4px 0;
+	font-size: 0.95em;
+}
+
+.storylab-show-meta {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-bottom: 6px;
+	line-height: 1.4;
+}
+
+.storylab-show-meta:last-child {
+	margin-bottom: 0;
+}
+
+.storylab-show-meta .label {
+	color: #CD1214;
+	font-weight: 700;
+	min-width: 52px;
+	text-transform: uppercase;
+	font-size: 0.82em;
+	letter-spacing: 0.06em;
+	padding-top: 1px;
+}
+
+.storylab-show-meta .value {
+	color: #fff;
+}
+
+/* --- Name-your-price input wrapper --- */
+.storylab-nyp-wrap {
+	margin: 16px 0 20px;
+}
+
+.storylab-nyp-label {
+	display: block;
+	font-weight: 700;
+	font-size: 1em;
+	margin-bottom: 8px;
+	color: #111;
+}
+
+.storylab-nyp-label small {
+	font-weight: 400;
+	color: #555;
+	margin-left: 6px;
+}
+
+.storylab-nyp-input-wrap {
+	display: flex;
+	align-items: center;
+	border: 2px solid #CD1214;
+	border-radius: 4px;
+	overflow: hidden;
+	max-width: 220px;
+}
+
+.storylab-currency-symbol {
+	background: #CD1214;
+	color: #fff;
+	padding: 10px 14px;
+	font-size: 1.1em;
+	font-weight: 700;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.storylab-price-input {
+	border: none !important;
+	box-shadow: none !important;
+	outline: none !important;
+	padding: 10px 12px !important;
+	font-size: 1.15em !important;
+	width: 100% !important;
+	-moz-appearance: textfield;
+}
+
+.storylab-price-input::-webkit-inner-spin-button,
+.storylab-price-input::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Error state */
+.storylab-price-input.storylab-error {
+	background: #fff5f5;
+}
+
+.storylab-price-error {
+	color: #CD1214;
+	font-size: 0.88em;
+	margin-top: 5px;
+	display: none;
+}
