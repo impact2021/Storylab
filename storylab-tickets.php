@@ -40,7 +40,6 @@ function storylab_init() {
 	require_once STORYLAB_PLUGIN_DIR . 'includes/class-order-handler.php';
 	require_once STORYLAB_PLUGIN_DIR . 'includes/class-admin.php';
 
-	new Storylab_Show_CPT();
 	new Storylab_Ticket_Woo();
 	new Storylab_Order_Handler();
 	new Storylab_Admin();

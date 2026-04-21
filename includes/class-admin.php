@@ -46,15 +46,6 @@ class Storylab_Admin {
 			'storylab-tickets',
 			array( $this, 'render_settings_page' )
 		);
-
-		// Shows sub-page (links to the CPT list).
-		add_submenu_page(
-			'storylab-tickets',
-			'Shows',
-			'Shows',
-			'manage_options',
-			'edit.php?post_type=' . Storylab_Show_CPT::POST_TYPE
-		);
 	}
 
 	// =========================================================================
@@ -154,27 +145,18 @@ class Storylab_Admin {
 			<h2>Quick Start Guide</h2>
 			<ol>
 				<li>
-					Go to <strong>Shows → Add New Show</strong> and fill in the show name, date,
-					time and venue.
+					Create a WooCommerce <strong>Simple product</strong> for the show and give it
+					the show's name (e.g. "My Messy Break Up").
 				</li>
 				<li>
-					Create a WooCommerce <strong>Simple product</strong> for the show. Set its
-					price to <em>0</em> (or any placeholder) — it will be overridden by the
-					customer's chosen price.
+					On the product edit page, open the <strong>Show Ticket</strong> tab.
+					Enter the show date, time and venue, then tick
+					<em>Enable Name-Your-Price</em> and optionally set a minimum price.
 				</li>
 				<li>
-					On the product edit page, open the <strong>Show Ticket</strong> tab, select
-					the show you just created and tick <em>Enable Name-Your-Price</em>.
-					Optionally set a minimum price.
-				</li>
-				<li>
-					Link the same product back on the Show post using the
-					<em>WooCommerce Product</em> dropdown.
-				</li>
-				<li>
-					Publish both posts. Customers will now see show details and a price input
-					on the product page. On checkout, PDF tickets are generated and emailed
-					automatically — one page per ticket.
+					Publish the product.  Customers will see the show details and a price
+					input on the product page.  On checkout, PDF tickets are generated and
+					emailed automatically — up to four tickets per page.
 				</li>
 			</ol>
 		</div>

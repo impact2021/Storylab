@@ -92,15 +92,16 @@ class Storylab_Order_Handler {
 				$location = $show['location'];
 			}
 
-			$ticket_data = [
+			$ticket_data = array(
 				'show_name'    => $show_name,
 				'date'         => $date,
 				'time'         => $time,
 				'location'     => $location,
 				'order_number' => $order->get_order_number(),
-				'seq'          => 1,        // set per page inside generator
+				'seq'          => 1,        // set per ticket inside generator
 				'quantity'     => $quantity,
-			];
+				'ticket_names' => $item->get_meta( '_storylab_ticket_names' ) ?: array(),
+			);
 
 			$path = Storylab_Ticket_Generator::generate( $ticket_data, $quantity );
 			if ( $path ) {
