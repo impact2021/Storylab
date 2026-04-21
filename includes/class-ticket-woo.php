@@ -32,6 +32,9 @@ class Storylab_Ticket_Woo {
 		// Apply the stored price every time the cart recalculates.
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'apply_custom_price' ), 20 );
 
+		// Ensure the cart item Price column shows the entered amount.
+		add_filter( 'woocommerce_cart_item_price', array( $this, 'filter_cart_item_price_display' ), 10, 3 );
+
 		// Display the chosen price and ticket names in the cart/checkout line item.
 		add_filter( 'woocommerce_get_item_data', array( $this, 'display_custom_price_in_cart' ), 10, 2 );
 
@@ -299,6 +302,17 @@ class Storylab_Ticket_Woo {
 				$item['data']->set_price( $item['storylab_price'] );
 			}
 		}
+	}
+
+	/**
+	 * Ensure the cart "Price" column shows the entered name-your-price amount
+	 * rather than the product's original listed price.
+	 */
+	public function filter_cart_item_price_display( $price_html, $cart_item, $cart_item_key ) {
+		if ( isset( $cart_item['storylab_price'] ) ) {
+			return wc_price( $cart_item['storylab_price'] );
+		}
+		return $price_html;
 	}
 
 	public function display_custom_price_in_cart( $item_data, $cart_item ) {
