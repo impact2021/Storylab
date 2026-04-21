@@ -71,7 +71,8 @@ class Storylab_Order_Handler {
 			$product_id = $item->get_product_id();
 			$quantity   = $item->get_quantity();
 
-			// Only process show-ticket products.
+			// Only process show-ticket products (products linked to a show OR name-your-price enabled).
+			// Skip the item only when BOTH conditions are false.
 			$show = Storylab_Show_CPT::get_show_for_product( $product_id );
 			if ( ! $show && ! Storylab_Ticket_Woo::is_nyp( $product_id ) ) {
 				continue;

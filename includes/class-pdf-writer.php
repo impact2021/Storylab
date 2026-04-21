@@ -85,9 +85,8 @@ class Storylab_PDF_Writer {
 			             . ( $xobj_dict ? " /XObject <<$xobj_dict >>" : '' )
 			             . ' >>';
 
-			// Content stream object.
-			$len        = strlen( $content );
-			$stream_id  = $this->new_stream( "/Length $len", $content );
+			// Content stream object (new_stream calculates /Length internally).
+			$stream_id  = $this->new_stream( '', $content );
 
 			// Page object — references Pages (obj 2).
 			$page_ids[] = $this->new_obj(
@@ -272,7 +271,9 @@ class Storylab_PDF_Writer {
 		$id  = ++$this->next_id;
 		$len = strlen( $data );
 		$this->offsets[ $id ] = strlen( $this->buf );
-		$this->buf .= "$id 0 obj\n<< /Length $len $dict_extra>>\nstream\n$data\nendstream\nendobj\n";
+		// Note: $dict_extra may be empty string; ensure a space before closing >>.
+		$extra = $dict_extra !== '' ? ' ' . ltrim( $dict_extra ) : '';
+		$this->buf .= "$id 0 obj\n<< /Length $len$extra >>\nstream\n$data\nendstream\nendobj\n";
 		return $id;
 	}
 

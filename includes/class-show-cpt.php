@@ -14,8 +14,11 @@ class Storylab_Show_CPT {
 
 	const POST_TYPE = 'storylab_show';
 
-	/** Default venue used when creating a new show. */
-	const DEFAULT_LOCATION = '7:00pm at Crave Cafe, 6 Morningside Drive, Morningside';
+	/** Default venue address used when creating a new show. */
+	const DEFAULT_VENUE = 'Crave Cafe, 6 Morningside Drive, Morningside';
+
+	/** Default show time used when a show has no time set. */
+	const DEFAULT_TIME = '7:00 PM';
 
 	public function __construct() {
 		add_action( 'init',                  array( $this, 'register_post_type' ) );
@@ -78,10 +81,10 @@ class Storylab_Show_CPT {
 		$product  = get_post_meta( $post->ID, '_show_product_id', true );
 
 		if ( '' === $time ) {
-			$time = '7:00 PM';
+			$time = self::DEFAULT_TIME;
 		}
 		if ( '' === $location ) {
-			$location = self::DEFAULT_LOCATION;
+			$location = self::DEFAULT_VENUE;
 		}
 
 		// Build product dropdown list.
@@ -108,7 +111,7 @@ class Storylab_Show_CPT {
 				<td>
 					<input type="text" id="show_location" name="show_location"
 					       value="<?php echo esc_attr( $location ); ?>" class="large-text"
-					       placeholder="<?php echo esc_attr( self::DEFAULT_LOCATION ); ?>" />
+					       placeholder="<?php echo esc_attr( self::DEFAULT_VENUE ); ?>" />
 					<p class="description">Full venue name and address.</p>
 				</td>
 			</tr>
@@ -219,8 +222,8 @@ class Storylab_Show_CPT {
 			'id'         => $post->ID,
 			'name'       => $post->post_title,
 			'date'       => get_post_meta( $post->ID, '_show_date', true ),
-			'time'       => get_post_meta( $post->ID, '_show_time', true ) ?: '7:00 PM',
-			'location'   => get_post_meta( $post->ID, '_show_location', true ) ?: self::DEFAULT_LOCATION,
+			'time'       => get_post_meta( $post->ID, '_show_time', true ) ?: self::DEFAULT_TIME,
+			'location'   => get_post_meta( $post->ID, '_show_location', true ) ?: self::DEFAULT_VENUE,
 			'product_id' => (int) get_post_meta( $post->ID, '_show_product_id', true ),
 		);
 	}

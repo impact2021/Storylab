@@ -112,7 +112,7 @@ class Storylab_Admin {
 	}
 
 	public function field_default_location() {
-		$val = get_option( 'storylab_default_location', Storylab_Show_CPT::DEFAULT_LOCATION );
+		$val = get_option( 'storylab_default_location', Storylab_Show_CPT::DEFAULT_VENUE );
 		?>
 		<input type="text" name="storylab_default_location"
 		       value="<?php echo esc_attr( $val ); ?>" class="large-text" />
