@@ -35,11 +35,6 @@ class Storylab_Ticket_Generator {
 	const C_DGRAY_G =  80;
 	const C_DGRAY_B =  80;
 
-	// Cream/ivory background
-	const C_CREAM_R = 255;
-	const C_CREAM_G = 255;
-	const C_CREAM_B = 255;
-
 	// Gold/tan border accent
 	const C_GOLD_R  = 184;
 	const C_GOLD_G  = 163;
@@ -206,10 +201,10 @@ class Storylab_Ticket_Generator {
 		$btm_h        = 18;  // dark maroon bottom accent height
 
 		// ------------------------------------------------------------------
-		// 1. Cream background (full ticket area).
+		// 1. White background (full ticket area).
 		// ------------------------------------------------------------------
 		$ops .= $w->rect( $tx, $ty, $tw, $th,
-			self::C_CREAM_R, self::C_CREAM_G, self::C_CREAM_B );
+			self::C_WHITE_R, self::C_WHITE_G, self::C_WHITE_B );
 
 		// ------------------------------------------------------------------
 		// 2. Gold outer border (top, right, bottom — not left because of bars).
