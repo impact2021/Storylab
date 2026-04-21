@@ -35,6 +35,21 @@ class Storylab_Ticket_Generator {
 	const C_DGRAY_G =  80;
 	const C_DGRAY_B =  80;
 
+	// Cream/ivory background
+	const C_CREAM_R = 245;
+	const C_CREAM_G = 240;
+	const C_CREAM_B = 225;
+
+	// Gold/tan border accent
+	const C_GOLD_R  = 184;
+	const C_GOLD_G  = 163;
+	const C_GOLD_B  =  72;
+
+	// Dark maroon bottom accent
+	const C_DKRED_R = 100;
+	const C_DKRED_G =  20;
+	const C_DKRED_B =  25;
+
 	// Maximum tickets laid out on a single page.
 	const TICKETS_PER_PAGE = 4;
 
@@ -121,25 +136,25 @@ class Storylab_Ticket_Generator {
 		$PH = Storylab_PDF_Writer::PH; // 842
 
 		// Page geometry.
-		$mg        = 20;  // outer page margin (pts)
-		$footer_h  = 16;  // red footer strip height
-		$gap       = 8;   // gap between tickets
+		$mg       = 20; // outer page margin (pts)
+		$gap      = 12; // gap between tickets
+		$footer_h = 14; // small footer strip height
 
-		$avail_w = $PW - 2 * $mg;                             // 555
-		$avail_h = $PH - 2 * $mg - $footer_h;                 // 786
+		$avail_w  = $PW - 2 * $mg;                            // 555
+		$avail_h  = $PH - 2 * $mg - $footer_h;                // 794
 		$ticket_h = ( $avail_h - ( self::TICKETS_PER_PAGE - 1 ) * $gap ) / self::TICKETS_PER_PAGE;
-		// ≈ 190.5 pts per ticket
+		// ≈ 191 pts per ticket
 
 		$ops = '';
 
-		// White page background.
-		$ops .= $w->rect( 0, 0, $PW, $PH, self::C_WHITE_R, self::C_WHITE_G, self::C_WHITE_B );
+		// Light gray page background.
+		$ops .= $w->rect( 0, 0, $PW, $PH, 230, 230, 230 );
 
-		// Red footer strip.
+		// Subtle footer strip.
 		$ops .= $w->rect( 0, $PH - $footer_h, $PW, $footer_h,
-			self::C_RED_R, self::C_RED_G, self::C_RED_B );
-		$ops .= $w->text_centered( $PW / 2, $PH - $footer_h + 11, 'actorslab.co.nz',
-			7, false, self::C_WHITE_R, self::C_WHITE_G, self::C_WHITE_B );
+			self::C_DGRAY_R, self::C_DGRAY_G, self::C_DGRAY_B );
+		$ops .= $w->text_centered( $PW / 2, $PH - $footer_h + 9, 'actorslab.co.nz',
+			6, false, self::C_LGRAY_R, self::C_LGRAY_G, self::C_LGRAY_B );
 
 		// Draw each ticket.
 		foreach ( $group as $idx => $d ) {
@@ -171,116 +186,184 @@ class Storylab_Ticket_Generator {
 	                                            $tx, $ty, $tw, $th ) {
 		$ops = '';
 
-		$hdr_h  = 30;              // red header height
-		$body_y = $ty + $hdr_h;
-		$body_h = $th - $hdr_h;
+		// ------------------------------------------------------------------
+		// Layout geometry
+		// ------------------------------------------------------------------
+		$left_blk_w   = 8;   // black bar on far left
+		$left_red_w   = 12;  // red bar next to the black bar
+		$left_bar_w   = $left_blk_w + $left_red_w; // 20 pts total left bars
+
+		$stub_w       = 114; // right stub width
+		$stub_x       = $tx + $tw - $stub_w; // left edge of stub
+
+		$logo_zone_w  = 84;  // logo column width
+		$logo_zone_x  = $tx + $left_bar_w; // = tx + 20
+
+		$vsep_x       = $logo_zone_x + $logo_zone_w; // thin vertical separator x
+		$content_x    = $vsep_x + 3;                 // content text starts here
+		$content_w    = $stub_x - $content_x - 6;    // available text width
+
+		$btm_h        = 18;  // dark maroon bottom accent height
 
 		// ------------------------------------------------------------------
-		// 1. Black border (full ticket area).
+		// 1. Cream background (full ticket area).
 		// ------------------------------------------------------------------
 		$ops .= $w->rect( $tx, $ty, $tw, $th,
-			self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+			self::C_CREAM_R, self::C_CREAM_G, self::C_CREAM_B );
 
 		// ------------------------------------------------------------------
-		// 2. Red header bar.
+		// 2. Gold outer border (top, right, bottom — not left because of bars).
 		// ------------------------------------------------------------------
-		$ops .= $w->rect( $tx, $ty, $tw, $hdr_h,
+		$border_start = $tx + $left_bar_w;
+		$border_w     = $tw - $left_bar_w;
+		// Outer lines.
+		$ops .= $w->hline( $border_start, $ty, $border_w,
+			self::C_GOLD_R, self::C_GOLD_G, self::C_GOLD_B, 1.5 );
+		$ops .= $w->hline( $border_start, $ty + $th - 1.5, $border_w,
+			self::C_GOLD_R, self::C_GOLD_G, self::C_GOLD_B, 1.5 );
+		$ops .= $w->rect( $tx + $tw - 1.5, $ty, 1.5, $th,
+			self::C_GOLD_R, self::C_GOLD_G, self::C_GOLD_B );
+		// Inner lines (thinner, inset 3 pts).
+		$ops .= $w->hline( $border_start + 3, $ty + 4, $border_w - 5,
+			self::C_GOLD_R, self::C_GOLD_G, self::C_GOLD_B, 0.5 );
+		$ops .= $w->hline( $border_start + 3, $ty + $th - 5, $border_w - 5,
+			self::C_GOLD_R, self::C_GOLD_G, self::C_GOLD_B, 0.5 );
+
+		// ------------------------------------------------------------------
+		// 3. Left decorative bars (full ticket height).
+		// ------------------------------------------------------------------
+		$ops .= $w->rect( $tx, $ty, $left_blk_w, $th,
+			self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+		$ops .= $w->rect( $tx + $left_blk_w, $ty, $left_red_w, $th,
+			self::C_RED_R, self::C_RED_G, self::C_RED_B );
+		// Dark maroon accent at the bottom of the left bars.
+		$ops .= $w->rect( $tx, $ty + $th - $btm_h, $left_bar_w + 2, $btm_h,
+			self::C_DKRED_R, self::C_DKRED_G, self::C_DKRED_B );
+
+		// ------------------------------------------------------------------
+		// 4. Thin red vertical separator between logo zone and content.
+		// ------------------------------------------------------------------
+		$ops .= $w->rect( $vsep_x, $ty + 6, 1, $th - 12,
 			self::C_RED_R, self::C_RED_G, self::C_RED_B );
 
-		// Logo centred in header.
+		// ------------------------------------------------------------------
+		// 5. Logo centred in the logo zone.
+		// ------------------------------------------------------------------
 		$logo_url    = $d['logo_url'] ?? '';
 		$logo_placed = false;
 		if ( $logo_url ) {
-			$logo_h    = 22;
-			$logo_draw_w = min( $tw * 0.35, $logo_h * 3.5 );
-			$logo_x    = $tx + ( $tw - $logo_draw_w ) / 2;
-			$logo_y    = $ty + ( $hdr_h - $logo_h ) / 2;
-			$img_ops   = $w->image( $logo_url, $logo_x, $logo_y, $logo_draw_w, $logo_h );
+			$logo_draw_h = min( 55, $th * 0.38 );
+			$logo_draw_w = $logo_draw_h * 1.25;
+			if ( $logo_draw_w > $logo_zone_w - 10 ) {
+				$logo_draw_w = $logo_zone_w - 10;
+				$logo_draw_h = $logo_draw_w / 1.25;
+			}
+			$lx      = $logo_zone_x + ( $logo_zone_w - $logo_draw_w ) / 2;
+			$ly      = $ty + ( $th - $logo_draw_h ) / 2 - 8;
+			$img_ops = $w->image( $logo_url, $lx, $ly, $logo_draw_w, $logo_draw_h );
 			if ( $img_ops ) {
 				$ops       .= $img_ops;
 				$logo_placed = true;
 			}
 		}
 		if ( ! $logo_placed ) {
-			$ops .= $w->text_centered( $tx + $tw / 2, $ty + $hdr_h / 2 + 5,
-				'STORY LAB', 10, true,
-				self::C_WHITE_R, self::C_WHITE_G, self::C_WHITE_B );
+			// Fallback: text representation of the Story Lab logo.
+			$lcy = $ty + $th / 2 - 20;
+			$lcx = $logo_zone_x + $logo_zone_w / 2;
+			$ops .= $w->text_centered( $lcx, $lcy,      'Story', 13, true,
+				self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+			$ops .= $w->text_centered( $lcx, $lcy + 16, 'Lab.', 13, true,
+				self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+			$ops .= $w->text_centered( $lcx, $lcy + 28, 'AOTEAROA', 5, false,
+				self::C_DGRAY_R, self::C_DGRAY_G, self::C_DGRAY_B );
 		}
 
 		// ------------------------------------------------------------------
-		// 3. White body.
+		// 6. Right stub.
 		// ------------------------------------------------------------------
-		$ops .= $w->rect( $tx + 1, $body_y, $tw - 2, $body_h - 1,
-			self::C_WHITE_R, self::C_WHITE_G, self::C_WHITE_B );
+		$stub_cx = $stub_x + $stub_w / 2;
 
-		// Red left accent strip.
-		$ops .= $w->rect( $tx + 1, $body_y, 5, $body_h - 1,
-			self::C_RED_R, self::C_RED_G, self::C_RED_B );
-
-		// ------------------------------------------------------------------
-		// 4. Right stub area (separated by a vertical dashed line).
-		// ------------------------------------------------------------------
-		$stub_w = 70;
-		$stub_x = $tx + $tw - $stub_w - 1;
-
-		// Vertical dashed separator.
-		$dash_y   = $body_y + 6;
-		$dash_end = $body_y + $body_h - 7;
-		while ( $dash_y + 2.5 <= $dash_end ) {
-			$ops .= $w->rect( $stub_x, $dash_y, 0.75, 2.5,
+		// Vertical dotted separator.
+		$dash_y   = $ty + 6;
+		$dash_end = $ty + $th - 6;
+		while ( $dash_y + 3 <= $dash_end ) {
+			$ops .= $w->rect( $stub_x - 0.75, $dash_y, 0.75, 2.5,
 				self::C_LGRAY_R, self::C_LGRAY_G, self::C_LGRAY_B );
 			$dash_y += 5.5;
 		}
 
+		// "TICKET" in red bold.
+		$sy = $ty + 18;
+		$ops .= $w->text_centered( $stub_cx, $sy, 'TICKET', 8, true,
+			self::C_RED_R, self::C_RED_G, self::C_RED_B );
+		$sy += 12;
+
+		// "— X of Y —" in dark gray.
+		$seq_line = "\xe2\x80\x94 " . $d['seq'] . ' of ' . $d['quantity'] . " \xe2\x80\x94";
+		$ops .= $w->text_centered( $stub_cx, $sy, $seq_line, 8, false,
+			self::C_DGRAY_R, self::C_DGRAY_G, self::C_DGRAY_B );
+		$sy += 14;
+
+		// Thin separator rule.
+		$ops .= $w->hline( $stub_x + 8, $sy, $stub_w - 18,
+			self::C_LGRAY_R, self::C_LGRAY_G, self::C_LGRAY_B, 0.5 );
+		$sy += 9;
+
 		// Ticket number.
 		$ticket_num = 'SL-' . str_pad( $d['order_number'], 6, '0', STR_PAD_LEFT )
 		              . '-' . str_pad( $d['seq'], 2, '0', STR_PAD_LEFT );
-		$stub_cx     = $stub_x + $stub_w / 2 + 2;
-		$stub_label_y = $body_y + 16;
-
-		$ops .= $w->text_centered( $stub_cx, $stub_label_y, 'TICKET', 7, false,
-			self::C_DGRAY_R, self::C_DGRAY_G, self::C_DGRAY_B );
-		$stub_label_y += 10;
-		$ops .= $w->text_centered( $stub_cx, $stub_label_y, $ticket_num, 7, true,
+		$ops .= $w->text_centered( $stub_cx, $sy, $ticket_num, 7, true,
 			self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
-		$stub_label_y += 24;
+		$sy += 14;
 
-		$ops .= $w->text_centered( $stub_cx, $stub_label_y, 'TICKET', 7, false,
-			self::C_DGRAY_R, self::C_DGRAY_G, self::C_DGRAY_B );
-		$stub_label_y += 10;
-		$ops .= $w->text_centered( $stub_cx, $stub_label_y,
-			$d['seq'] . ' of ' . $d['quantity'], 9, true,
+		// Barcode.
+		$bar_x = $stub_x + 6;
+		$bar_w = $stub_w - 14;
+		$bar_h = 26;
+		$ops .= static::draw_barcode( $w, $bar_x, $sy, $bar_w, $bar_h, $ticket_num );
+		$sy += $bar_h + 5;
+
+		// Decorative digits below barcode.
+		$hash_chars = str_split( substr( md5( $ticket_num ), 0, 12 ) );
+		$bar_digits = implode( '', array_slice( $hash_chars, 0, 6 ) )
+		              . ' ' . implode( '', array_slice( $hash_chars, 6, 6 ) );
+		$ops .= $w->text_centered( $stub_cx, $sy, strtoupper( $bar_digits ), 6, false,
 			self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+
+		// Dark maroon accent at the bottom of the stub.
+		$ops .= $w->rect( $stub_x, $ty + $th - $btm_h, $stub_w - 2, $btm_h,
+			self::C_DKRED_R, self::C_DKRED_G, self::C_DKRED_B );
 
 		// ------------------------------------------------------------------
-		// 5. Main content area.
+		// 7. Main content: show name + detail rows.
 		// ------------------------------------------------------------------
-		$content_x = $tx + 13;
-		$content_w = $stub_x - $content_x - 6;
-		$cursor_y  = $body_y + 16;
+		$cursor_y = $ty + 18;
 
-		// Show name.
+		// Show name (large, red, bold).
 		$show_name = ! empty( $d['show_name'] ) ? $d['show_name'] : 'Story Lab';
-		$name_size = 12;
+		$name_size = 15;
 		while ( $name_size > 8
 		        && $w->approx_text_width( $show_name, $name_size, true ) > $content_w ) {
 			$name_size--;
 		}
-		$result    = $w->text_wrap( $content_x, $cursor_y, $show_name, $content_w,
+		$result   = $w->text_wrap( $content_x, $cursor_y, $show_name, $content_w,
 			$name_size, true,
 			self::C_RED_R, self::C_RED_G, self::C_RED_B );
-		$ops      .= $result['ops'];
-		$cursor_y  = $result['y'] + 3;
+		$ops     .= $result['ops'];
+		$cursor_y = $result['y'] + 2;
 
 		// Thin red separator line.
-		$ops     .= $w->hline( $content_x, $cursor_y, $content_w - 4,
+		$ops     .= $w->hline( $content_x, $cursor_y, $content_w - 10,
 			self::C_RED_R, self::C_RED_G, self::C_RED_B, 0.75 );
-		$cursor_y += 8;
+		$cursor_y += 10;
 
 		// Detail rows: DATE, TIME, VENUE, NAME.
-		$label_size = 7;
-		$value_size = 9;
-		$row_h      = 13;
+		// Labels: red, 6pt. Values: black bold, 9pt.
+		// Fixed label column width for consistent alignment.
+		$label_size  = 6;
+		$value_size  = 9;
+		$row_h       = 14;
+		$label_col_w = 30; // wide enough for 'VENUE' at 6pt
 
 		$details = array();
 		if ( ! empty( $d['date'] ) )        { $details[] = array( 'DATE',  $d['date'] ); }
@@ -290,12 +373,11 @@ class Storylab_Ticket_Generator {
 
 		foreach ( $details as $row ) {
 			list( $label, $value ) = $row;
-			$lw = $w->approx_text_width( $label . '  ', $label_size, false );
 			$ops .= $w->text( $content_x, $cursor_y, $label, $label_size, false,
-				self::C_DGRAY_R, self::C_DGRAY_G, self::C_DGRAY_B );
+				self::C_RED_R, self::C_RED_G, self::C_RED_B );
 			$val_result = $w->text_wrap(
-				$content_x + $lw, $cursor_y,
-				$value, $content_w - $lw,
+				$content_x + $label_col_w, $cursor_y,
+				$value, $content_w - $label_col_w,
 				$value_size, true,
 				self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B,
 				$row_h
@@ -304,19 +386,75 @@ class Storylab_Ticket_Generator {
 			$cursor_y  = max( $cursor_y + $row_h, $val_result['y'] );
 		}
 
-		// ------------------------------------------------------------------
-		// 6. Tear-here line near bottom of ticket.
-		// ------------------------------------------------------------------
-		$tear_y = $ty + $th - 26;
-		$ops   .= $w->hline( $tx + 6, $tear_y, $stub_x - $tx - 6,
-			self::C_LGRAY_R, self::C_LGRAY_G, self::C_LGRAY_B, 0.5 );
-		$ops   .= $w->text_centered(
-			$tx + ( $stub_x - $tx ) / 2,
-			$tear_y + 8,
-			'- - - - - - - - TEAR HERE - - - - - - - -',
-			6, false,
-			self::C_LGRAY_R, self::C_LGRAY_G, self::C_LGRAY_B
-		);
+		// Dotted bottom line across the content area.
+		$dot_y       = $ty + $th - 10;
+		$dot_count   = 32;
+		$dot_spacing = ( $stub_x - $content_x - 10 ) / $dot_count;
+		for ( $i = 0; $i < $dot_count; $i++ ) {
+			$ops .= $w->rect( $content_x + $i * $dot_spacing, $dot_y, 1.2, 1.2,
+				self::C_LGRAY_R, self::C_LGRAY_G, self::C_LGRAY_B );
+		}
+
+		return $ops;
+	}
+
+	// =========================================================================
+	// Barcode helper
+	// =========================================================================
+
+	/**
+	 * Draw a decorative barcode from a seed string.
+	 * Uses a deterministic pattern derived from md5($seed).
+	 *
+	 * @param Storylab_PDF_Writer $w
+	 * @param float  $x      Left edge.
+	 * @param float  $y      Top edge (from page top).
+	 * @param float  $bw     Total available width.
+	 * @param float  $bh     Bar height.
+	 * @param string $seed   Seed string (e.g. ticket number).
+	 * @return string
+	 */
+	private static function draw_barcode( Storylab_PDF_Writer $w, $x, $y, $bw, $bh, $seed ) {
+		$hash = md5( $seed );
+		$ops  = '';
+		$cx   = (float) $x;
+		$end  = (float) ( $x + $bw );
+
+		// Leading guard bars.
+		foreach ( array( 1.0, 1.0, 1.0 ) as $gw ) {
+			$ops .= $w->rect( $cx, $y, $gw, $bh,
+				self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+			$cx += $gw + 0.8;
+		}
+		$cx += 1.0;
+
+		// Data bars derived from hash (repeated to fill width).
+		$hex_chars = str_split( str_repeat( $hash, 4 ) );
+		foreach ( $hex_chars as $ch ) {
+			// Reserve space for the trailing guard bars.
+			if ( $cx + 6 >= $end ) {
+				break;
+			}
+			$v = hexdec( $ch );
+			if ( $v < 5 )      { $barw = 1.0; }
+			elseif ( $v < 11 ) { $barw = 1.6; }
+			else               { $barw = 2.3; }
+
+			$ops .= $w->rect( $cx, $y, $barw, $bh,
+				self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+			$cx += $barw + 0.8;
+		}
+
+		// Trailing guard bars.
+		$cx = $end - 4.6;
+		foreach ( array( 1.0, 1.0, 1.0 ) as $gw ) {
+			if ( $cx >= $end ) {
+				break;
+			}
+			$ops .= $w->rect( $cx, $y, $gw, $bh,
+				self::C_BLACK_R, self::C_BLACK_G, self::C_BLACK_B );
+			$cx += $gw + 0.8;
+		}
 
 		return $ops;
 	}
