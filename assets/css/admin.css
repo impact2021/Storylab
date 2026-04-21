@@ -1,0 +1,21 @@
+/* ============================================================
+   Storylab Tickets — Admin Styles
+   ============================================================ */
+
+/* Settings page heading colour */
+.wrap h1 span[style] {
+	font-size: 0.7em;
+	vertical-align: middle;
+}
+
+/* Product data tab icon */
+.woocommerce-product-data ul.wc-tabs li.storylab_ticket_options a::before {
+	content: '\f486';   /* dashicons-tickets-alt */
+	font-family: dashicons;
+	font-size: 18px;
+}
+
+/* Ensure the show-ticket panel is padded like other WC panels */
+#storylab_ticket_data.panel {
+	padding: 16px;
+}
