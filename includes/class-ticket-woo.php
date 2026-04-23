@@ -210,7 +210,7 @@ class Storylab_Ticket_Woo {
 			<label for="storylab_price" class="storylab-nyp-label">
 				<?php esc_html_e( 'Name your price', 'storylab-tickets' ); ?>
 				<?php if ( $min > 0 ) : ?>
-					<small>(<?php printf( esc_html__( 'minimum %s', 'storylab-tickets' ), esc_html( $sym . number_format( $min, 2 ) ) ); ?>)</small>
+					<small>(<?php printf( esc_html__( 'minimum %s - suggest price $20', 'storylab-tickets' ), esc_html( $sym . number_format( $min, 2 ) ) ); ?>)</small>
 				<?php endif; ?>
 			</label>
 			<div class="storylab-nyp-input-wrap">
@@ -334,7 +334,7 @@ class Storylab_Ticket_Woo {
 			$names = array_filter( array_map( 'trim', $cart_item['storylab_ticket_names'] ) );
 			if ( ! empty( $names ) ) {
 				$item_data[] = array(
-					'key'   => __( 'Ticket names', 'storylab-tickets' ),
+					'key'   => count( $names ) === 1 ? __( 'Ticket name', 'storylab-tickets' ) : __( 'Ticket names', 'storylab-tickets' ),
 					'value' => implode( ', ', $names ),
 				);
 			}
