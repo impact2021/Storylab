@@ -210,7 +210,7 @@ class Storylab_Ticket_Woo {
 			<label for="storylab_price" class="storylab-nyp-label">
 				<?php esc_html_e( 'Name your price', 'storylab-tickets' ); ?>
 				<?php if ( $min > 0 ) : ?>
-					<small>(<?php printf( esc_html__( 'minimum %s - suggest price $20', 'storylab-tickets' ), esc_html( $sym . number_format( $min, 2 ) ) ); ?>)</small>
+					<small>(<?php printf( esc_html__( 'minimum %s - suggested price $20', 'storylab-tickets' ), esc_html( $sym . number_format( $min, 2 ) ) ); ?>)</small>
 				<?php endif; ?>
 			</label>
 			<div class="storylab-nyp-input-wrap">
